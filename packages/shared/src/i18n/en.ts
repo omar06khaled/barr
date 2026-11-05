@@ -52,6 +52,17 @@ export const en = {
   },
   concerns: { title: 'Concerns', raise: 'Raise a concern', deadline: 'We will reply by {{time}}', status: { open: 'Open', in_progress: 'In progress', resolved: 'Resolved' }, reopen: 'Reopen' },
   privacy: { title: 'Privacy policy', terms: 'Terms of service', placeholder: 'The final text will be provided by Barr. This is placeholder text.', deleteAccount: 'Delete my account', deleteConfirm: 'This removes your personal details from Barr. Your parent’s care records are kept as required by our retention policy. Continue?' },
+  family: {
+    addParent: '+ Add your parent', addAnother: '+ Add another parent', carePlan: 'Care plan', careTeam: 'Care team', planPayment: 'Plan & payment', chat: 'Chat', account: 'Account',
+    parentName: 'Parent name', mother: 'Mother', father: 'Father', address: 'Home address', neighborhood: 'Neighbourhood', pinHelp: 'Use the map pin at the home so visits can check in.', useMyLocation: 'Use current location (if you are at the home)', lat: 'Latitude', lng: 'Longitude',
+    parentPhone: 'Parent phone (optional)', emergency: 'Emergency contact in Egypt', emergencyName: 'Name', emergencyPhone: 'Phone', medicines: 'Known medicines (comma separated)', allergies: 'Any allergies?', allergyText: 'Allergy details', mobility: 'Mobility notes',
+    carerPref: 'Carer gender preference', sameAsParent: 'Same as parent (default)', female: 'Female', male: 'Male', any: 'Any',
+    choosePlan: 'Choose a plan', currency: 'Currency', payNow: 'Pay securely', perMonth: '/ month', paid: 'Paid. Thank you!', bookAssessment: 'Book the home assessment', noSlots: 'No slots available right now — your coordinator will call you.',
+    booked: 'Assessment booked', cancelPlan: 'Cancel plan', cancelConfirm: 'Cancellation takes effect at the end of the paid month. Continue?', changePlan: 'Change plan from next month', updateCard: 'Update card', card: 'Card', invoices: 'Invoices', downloadPdf: 'Download PDF', status: 'Status', renews: 'Renews',
+    accept: 'I accept this care plan', accepted: 'Accepted', version: 'Version', previous: 'Previous versions', goals: 'Goals', included: 'Included', notIncluded: 'Not included', visitsPlan: 'Visit schedule',
+    requestReplacement: 'Request a replacement', reason: 'Reason', current: 'current', inviteSibling: 'Invite a family member', invitePhone: 'Their mobile number', inviteSent: 'Invite sent. It expires in 7 days.', members: 'Family members', whatsapp: 'Receive updates on WhatsApp',
+    category: 'Category', urgent: 'Urgent', details: 'Details', submitted: 'Submitted. Reference {{ref}}.', message: 'Message', send: 'Send', monthly: 'Monthly reports',
+  },
   field: {
     todayVisits: "Today's visits", startVisit: 'Start visit (check in)', endVisit: 'Finish visit (check out)', tooFar: 'You are {{distance}} m from the home. Move within {{radius}} m to check in, or ask an admin to override.',
     noLocation: 'We could not read your location. Turn on location to check in.', escalate: 'Escalate', checklist: 'Checklist', addPhoto: 'Add photo', photoNoConsent: 'Photos are turned off for this person (no consent).',

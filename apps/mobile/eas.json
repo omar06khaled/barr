@@ -1,0 +1,16 @@
+{
+  "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
+  "build": {
+    "development": { "developmentClient": true, "distribution": "internal", "env": { "EXPO_PUBLIC_API_URL": "https://api.dev.barr.example" } },
+    "preview": { "distribution": "internal", "channel": "preview", "env": { "EXPO_PUBLIC_API_URL": "https://api.staging.barr.example" }, "android": { "buildType": "app-bundle" } },
+    "production": { "channel": "production", "autoIncrement": true, "env": { "EXPO_PUBLIC_API_URL": "https://api.barr.example" } },
+    "family-preview": { "extends": "preview", "env": { "APP_VARIANT": "family" } },
+    "field-preview": { "extends": "preview", "env": { "APP_VARIANT": "field" } },
+    "family-production": { "extends": "production", "env": { "APP_VARIANT": "family" } },
+    "field-production": { "extends": "production", "env": { "APP_VARIANT": "field" } }
+  },
+  "submit": {
+    "family-production": { "ios": { "ascAppId": "REPLACE_ME" }, "android": { "track": "internal" } },
+    "field-production": { "ios": { "ascAppId": "REPLACE_ME" }, "android": { "track": "internal" } }
+  }
+}

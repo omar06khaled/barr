@@ -54,6 +54,17 @@ export const ar: Dictionary = {
   },
   concerns: { title: 'الملاحظات والشكاوى', raise: 'أرسل ملاحظة', deadline: 'سنرد قبل {{time}}', status: { open: 'مفتوحة', in_progress: 'قيد المتابعة', resolved: 'تم الحل' }, reopen: 'إعادة فتح' },
   privacy: { title: 'سياسة الخصوصية', terms: 'شروط الخدمة', placeholder: 'سيتم توفير النص النهائي من بر. هذا نص مؤقت.', deleteAccount: 'حذف حسابي', deleteConfirm: 'سيؤدي هذا إلى حذف بياناتك الشخصية من بر. تُحفظ سجلات رعاية والدك/والدتك وفق سياسة الاحتفاظ. هل تريد المتابعة؟' },
+  family: {
+    addParent: '+ أضف والدك/والدتك', addAnother: '+ أضف والدًا آخر', carePlan: 'خطة الرعاية', careTeam: 'فريق الرعاية', planPayment: 'الباقة والدفع', chat: 'المحادثة', account: 'الحساب',
+    parentName: 'اسم الوالد/ة', mother: 'الأم', father: 'الأب', address: 'عنوان المنزل', neighborhood: 'الحي', pinHelp: 'حدد موقع المنزل على الخريطة ليتمكن الفريق من تسجيل الوصول.', useMyLocation: 'استخدم موقعي الحالي (إذا كنت في المنزل)', lat: 'خط العرض', lng: 'خط الطول',
+    parentPhone: 'هاتف الوالد/ة (اختياري)', emergency: 'جهة اتصال للطوارئ في مصر', emergencyName: 'الاسم', emergencyPhone: 'الهاتف', medicines: 'الأدوية المعروفة (افصل بفاصلة)', allergies: 'هل توجد حساسية؟', allergyText: 'تفاصيل الحساسية', mobility: 'ملاحظات الحركة',
+    carerPref: 'تفضيل جنس مقدم الرعاية', sameAsParent: 'نفس جنس الوالد/ة (افتراضي)', female: 'أنثى', male: 'ذكر', any: 'أي',
+    choosePlan: 'اختر الباقة', currency: 'العملة', payNow: 'ادفع بأمان', perMonth: '/ شهريًا', paid: 'تم الدفع. شكرًا لك!', bookAssessment: 'احجز التقييم المنزلي', noSlots: 'لا توجد مواعيد متاحة الآن — سيتصل بك المنسق.',
+    booked: 'تم حجز التقييم', cancelPlan: 'إلغاء الباقة', cancelConfirm: 'يسري الإلغاء في نهاية الشهر المدفوع. هل تريد المتابعة؟', changePlan: 'تغيير الباقة من الشهر القادم', updateCard: 'تحديث البطاقة', card: 'البطاقة', invoices: 'الفواتير', downloadPdf: 'تنزيل PDF', status: 'الحالة', renews: 'التجديد',
+    accept: 'أوافق على خطة الرعاية', accepted: 'تمت الموافقة', version: 'الإصدار', previous: 'الإصدارات السابقة', goals: 'الأهداف', included: 'يشمل', notIncluded: 'لا يشمل', visitsPlan: 'جدول الزيارات',
+    requestReplacement: 'طلب استبدال', reason: 'السبب', current: 'حالي', inviteSibling: 'دعوة فرد من العائلة', invitePhone: 'رقم جواله', inviteSent: 'تم إرسال الدعوة. تنتهي خلال 7 أيام.', members: 'أفراد العائلة', whatsapp: 'استلام التحديثات عبر واتساب',
+    category: 'الفئة', urgent: 'عاجل', details: 'التفاصيل', submitted: 'تم الإرسال. الرقم المرجعي {{ref}}.', message: 'رسالة', send: 'إرسال', monthly: 'التقارير الشهرية',
+  },
   field: {
     todayVisits: 'زيارات اليوم', startVisit: 'بدء الزيارة (تسجيل الوصول)', endVisit: 'إنهاء الزيارة (تسجيل المغادرة)', tooFar: 'أنت على بعد {{distance}} م من المنزل. اقترب لمسافة {{radius}} م لتسجيل الوصول، أو اطلب استثناء من المسؤول.',
     noLocation: 'تعذر قراءة موقعك. فعّل الموقع لتسجيل الوصول.', escalate: 'تصعيد', checklist: 'قائمة المهام', addPhoto: 'إضافة صورة', photoNoConsent: 'الصور غير مفعلة لهذا الشخص (لا توجد موافقة).',
