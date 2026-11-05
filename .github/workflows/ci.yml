@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_ADMIN_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.28.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck (shared, backend, dashboard, mobile)
+        run: pnpm -r run typecheck
+      - name: Unit tests (business rules)
+        run: pnpm --filter @barr/shared test
+      - name: Integration tests (Postgres + RLS + job queue timers)
+        run: pnpm --filter @barr/backend test
+      - name: Mobile unit tests (offline outbox)
+        run: pnpm --filter @barr/mobile test
+      - name: Mobile JS bundles (iOS + Android)
+        working-directory: apps/mobile
+        run: |
+          npx expo export --platform android --output-dir /tmp/export-android
+          APP_VARIANT=field npx expo export --platform ios --output-dir /tmp/export-ios
+      - name: Dashboard build
+        run: pnpm --filter @barr/dashboard build

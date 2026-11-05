@@ -147,7 +147,17 @@ export async function postMessage(c: Sql, now: Date, actor: Actor, a: { parentId
   )).rows[0];
   await c.query(`insert into chat_reads (thread_id, user_id, last_read_at) values ($1,$2,$3) on conflict (thread_id, user_id) do update set last_read_at=excluded.last_read_at`, [t.id, actor.userId, now]);
   if (actor.roles.includes('family')) await track(c, 'chat_family_message', actor.userId, a.parentId);
-  else await track(c, 'chat_staff_message', actor.userId, a.parentId);
+  else {
+    await track(c, 'chat_staff_message', actor.userId, a.parentId);
+    // F12: tell the family (push); mirror to WhatsApp only for members who opted in to chat mirroring.
+    const p = (await c.query(`select p.name, p.family_id, (select coalesce(nullif(first_name,''), display_name) from users where id=$2) sender from parents p where p.id=$1`, [a.parentId, actor.userId])).rows[0];
+    const members = (await c.query(`select user_id, chat_whatsapp_mirror from family_members where family_id=$1 and removed_at is null`, [p.family_id])).rows;
+    const vars = { sender: p.sender ?? '', parent: p.name, preview: a.kind === 'text' ? a.body.slice(0, 120) : a.kind === 'photo' ? '📷' : '🎤' };
+    const mirror = members.filter((x) => x.chat_whatsapp_mirror).map((x) => x.user_id);
+    const pushOnly = members.filter((x) => !x.chat_whatsapp_mirror).map((x) => x.user_id);
+    if (mirror.length) await notify(c, now, { type: 'chat_message', parentId: a.parentId, to: { users: mirror }, channels: ['push', 'whatsapp'], vars, dedupeKey: `chat:${m.id}` });
+    if (pushOnly.length) await notify(c, now, { type: 'chat_message', parentId: a.parentId, to: { users: pushOnly }, channels: ['push'], vars, dedupeKey: `chat:${m.id}` });
+  }
   return m;
 }
 

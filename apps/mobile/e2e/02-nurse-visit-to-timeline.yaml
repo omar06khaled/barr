@@ -1,0 +1,28 @@
+# E2E (§13): nurse visit (incl. offline) → family timeline. Run on the FIELD app, then the FAMILY app.
+appId: app.barr.field
+---
+- launchApp: { clearState: true }
+- tapOn: "English"
+- tapOn: { id: "phone" }
+- inputText: "+201000000010"   # seeded nurse "Mona"
+- tapOn: "Send code"
+- tapOn: { id: "code" }
+- inputText: "123456"
+- tapOn: "Verify"
+- assertVisible: "Today's visits"
+- tapOn: { index: 0, text: ".*·.*" }
+- setLocation: { latitude: 30.0626, longitude: 31.2197 }
+- setAirplaneMode: enabled          # capture fully offline
+- tapOn: "📍 Start visit (check in)"
+- tapOn: "4"
+- tapOn: "Blood pressure (systolic)"
+- inputText: "132"
+- tapOn: "✓ Finish visit (check out)"
+- assertVisible: ".*waiting to sync.*"
+- setAirplaneMode: disabled
+- waitForAnimationToEnd: { timeout: 30000 }
+- assertNotVisible: ".*waiting to sync.*"
+# Then in the family app the report must appear within 1 minute:
+- launchApp: { appId: app.barr.family }
+- tapOn: "Timeline"
+- assertVisible: "Nurse visit"

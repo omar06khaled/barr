@@ -8,7 +8,7 @@
     "setup": "bash infra/setup.sh",
     "build": "pnpm -r --filter=!@barr/mobile run build",
     "typecheck": "pnpm -r run typecheck",
-    "test": "pnpm -r --filter=!@barr/mobile run test",
+    "test": "pnpm -r run test",
     "lint": "pnpm -r run typecheck",
     "dev:backend": "pnpm --filter @barr/backend dev",
     "dev:worker": "pnpm --filter @barr/backend worker",

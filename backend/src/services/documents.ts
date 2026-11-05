@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 import { colors, formatMoney, templateMonthlyReportGenerator, type Currency, type MonthlyReportPayload, VITAL_KINDS, translate, addDays } from '@barr/shared';
 import type { Sql } from '../db/pool';
 import { notify } from './notifications';
@@ -57,7 +58,18 @@ export function monthlyHtml(r: { payload: MonthlyReportPayload; rendered_ar: str
 }
 
 /** F14: build the monthly report input from the database and store it (idempotent per parent+month). */
-export async function generateMonthlyReport(c: Sql, now: Date, parentId: string, month: string, publicBaseUrl: string) {
+/** Signed, expiring link (7 days) so a WhatsApp recipient can open the report without signing in. */
+export function reportLink(baseUrl: string, secret: string, reportId: string, now: Date) {
+  const exp = Math.floor(now.getTime() / 1000) + 7 * 86_400;
+  const sig = createHmac('sha256', secret).update(`report:${reportId}:${exp}`).digest('base64url');
+  return `${baseUrl}/v1/r/${reportId}?exp=${exp}&sig=${sig}`;
+}
+export function verifyReportLink(secret: string, reportId: string, exp: number, sig: string, now: Date) {
+  const want = createHmac('sha256', secret).update(`report:${reportId}:${exp}`).digest('base64url');
+  return exp * 1000 > now.getTime() && want.length === sig.length && want === sig;
+}
+
+export async function generateMonthlyReport(c: Sql, now: Date, parentId: string, month: string, publicBaseUrl: string, linkSecret = '') {
   const exists = (await c.query(`select id from reports where type='monthly' and parent_id=$1 and period_start=$2`, [parentId, `${month}-01`])).rows[0];
   if (exists) return exists.id as string;
   const p = (await c.query(`select id, name, family_id from parents where id=$1`, [parentId])).rows[0];
@@ -83,7 +95,7 @@ export async function generateMonthlyReport(c: Sql, now: Date, parentId: string,
     `insert into reports (type, parent_id, period_start, period_end, generator, structured_input, structured_payload, rendered_ar, rendered_en) values ('monthly',$1,$2,$3,$4,$5,$6,$7,$8)
      on conflict do nothing returning id`, [parentId, from, to, rep.generator, input, rep.payload, rep.text_ar, rep.text_en])).rows[0];
   if (!r) return null;
-  await notify(c, now, { type: 'monthly_report', parentId, to: { family: p.family_id }, vars: { parent: p.name, month, link: `${publicBaseUrl}/r/${r.id}` }, dedupeKey: `monthly:${r.id}`, data: { reportId: r.id } });
+  await notify(c, now, { type: 'monthly_report', parentId, to: { family: p.family_id }, vars: { parent: p.name, month, link: reportLink(publicBaseUrl, linkSecret, r.id, now) }, dedupeKey: `monthly:${r.id}`, data: { reportId: r.id } });
   await audit(c, { actorUserId: null, action: 'report.monthly_generated', entityType: 'report', entityId: r.id, parentId });
   return r.id as string;
 }

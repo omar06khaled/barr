@@ -1,0 +1,17 @@
+# E2E (§13): family "Get help now" → escalation closed. Doctor acknowledges + closes in the field app (or dashboard).
+appId: app.barr.family
+---
+- launchApp
+- tapOn: "⚠ Get help now"
+- tapOn: "Continue"
+- assertVisible: "Help is on the way.*"
+- assertVisible: "Raised"
+- launchApp: { appId: app.barr.field }
+- tapOn: "Escalation"
+- tapOn: "✓ Acknowledge"
+- tapOn: "Nurse sent to the home"
+- tapOn: "Note"
+- inputText: "Nurse visited; stable."
+- tapOn: "Close"
+- launchApp: { appId: app.barr.family }
+- assertVisible: "Closed"

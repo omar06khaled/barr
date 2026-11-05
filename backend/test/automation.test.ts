@@ -176,7 +176,15 @@ describe('F14 monthly report, F18 help line, F13 replacement', () => {
     expect(reps[0].structured_input.visitsCompleted).toBe(1);
     expect(reps[0].rendered_en).toContain('Visits: 1 of 1');
     expect(reps[0].rendered_ar).toContain('الزيارات');
-    expect((await h.owner.query(`select count(*)::int n from notifications where type='monthly_report'`)).rows[0].n).toBe(1);
+    const n = (await h.owner.query(`select body from notifications where type='monthly_report'`)).rows;
+    expect(n).toHaveLength(1);
+    // The WhatsApp/push link opens the report without sign-in (signed, expiring) and counts as an open.
+    const link = /http:\/\/test(\/v1\/r\/\S+)/.exec(n[0].body)![1]!;
+    const page = await h.app.inject({ method: 'GET', url: link });
+    expect(page.statusCode).toBe(200);
+    expect(page.body).toContain('التقرير الشهري');
+    expect((await h.app.inject({ method: 'GET', url: link.replace(/sig=[^&]+/, 'sig=forged') })).statusCode).toBe(403);
+    expect((await h.owner.query(`select count(*)::int n from analytics_events where name='whatsapp_report_opened'`)).rows[0].n).toBe(1);
   });
 
   it('help line: desk logs a call and converts it to an escalation in one click', async () => {
@@ -202,6 +210,25 @@ describe('F14 monthly report, F18 help line, F13 replacement', () => {
     const nurse = team.body.items.find((x: any) => x.user_id === h.ids.nurse);
     expect(nurse.ended_at).not.toBeNull();
     expect(team.body.items.find((x: any) => x.user_id === h.ids.otherNurse).ended_at).toBeNull();
+  });
+});
+
+describe('F12 chat', () => {
+  it('family ↔ coordinator thread; staff replies notify family; WhatsApp mirror only when opted in; unread counts', async () => {
+    const f = await newFamily(h);
+    await activate(h, f.parentId);
+    expect((await api(h, f.token, 'POST', `/parents/${f.parentId}/messages`, { body: 'Can the nurse come earlier on Sunday?', clientId: uuid() })).status).toBe(200);
+    const unread = await api(h, h.token('coordinator'), 'GET', '/field/chats');
+    expect(unread.body.items.find((x: any) => x.parent_id === f.parentId).unread).toBe(1);
+    await api(h, h.token('coordinator'), 'POST', `/parents/${f.parentId}/messages`, { body: 'Yes, 9:00 works.', clientId: uuid() });
+    let n = (await h.owner.query(`select channel from notifications where type='chat_message'`)).rows.map((r) => r.channel);
+    expect(n).toEqual(['push']);
+    await api(h, f.token, 'PUT', '/me/whatsapp', { familyId: f.familyId, optIn: true, chatMirror: true });
+    await api(h, h.token('coordinator'), 'POST', `/parents/${f.parentId}/messages`, { body: 'See you then.', clientId: uuid() });
+    n = (await h.owner.query(`select channel from notifications where type='chat_message' order by created_at`)).rows.map((r) => r.channel);
+    expect(n.sort()).toEqual(['push', 'push', 'whatsapp']);
+    const thread = await api(h, f.token, 'GET', `/parents/${f.parentId}/messages`);
+    expect(thread.body.items).toHaveLength(3);
   });
 });
 

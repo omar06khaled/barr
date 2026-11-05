@@ -62,7 +62,7 @@ export function registerJobs(w: Worker, d: Deps) {
     const prev = new Date(Date.UTC(y, m - 2, 1)).toISOString().slice(0, 7);
     await fanOut(c, now, 'reports.monthly_parent', `select id from parents where status in ('active','paused') and deleted_at is null`, [], `monthly:${prev}`, { month: prev });
   });
-  w.register<{ parentId: string; month: string }>('reports.monthly_parent', async ({ c, payload, now }) => { await generateMonthlyReport(c, now, payload.parentId, payload.month, d.env.PUBLIC_BASE_URL); });
+  w.register<{ parentId: string; month: string }>('reports.monthly_parent', async ({ c, payload, now }) => { await generateMonthlyReport(c, now, payload.parentId, payload.month, d.env.PUBLIC_BASE_URL, d.env.JWT_SECRET); });
   w.register('churn.daily', async ({ c, now }) => { await churnFlags(c, now); });
   return w;
 }

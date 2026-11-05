@@ -6,7 +6,7 @@
 export const NOTIFICATION_TYPES = [
   'visit_report_ready', 'daily_status', 'missed_dose', 'escalation_created', 'escalation_update', 'escalation_family_15min',
   'escalation_page_staff', 'concern_update', 'payment_succeeded', 'payment_failed', 'payment_paused', 'plan_changed_by_sibling',
-  'monthly_report', 'invite', 'no_show', 'visit_reminder', 'daily_route', 'otp',
+  'monthly_report', 'chat_message', 'invite', 'no_show', 'visit_reminder', 'daily_route', 'otp',
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
@@ -28,6 +28,7 @@ export const notificationTemplates: Record<NotificationType, T> = {
   payment_paused: { en: 'Service for {{parent}} is paused because payment failed. Update your card in the app to resume. Your coordinator will contact you.', ar: 'تم إيقاف الخدمة مؤقتًا لـ {{parent}} بسبب تعذر الدفع. حدّث بطاقتك من التطبيق للاستئناف. سيتواصل معك المنسق.' },
   plan_changed_by_sibling: { en: '{{actor}} {{change}}.', ar: '{{actor}} {{change}}.' },
   monthly_report: { en: 'The monthly report for {{parent}} ({{month}}) is ready: {{link}}', ar: 'التقرير الشهري لـ {{parent}} ({{month}}) جاهز: {{link}}' },
+  chat_message: { en: 'New message from {{sender}} about {{parent}}: {{preview}}', ar: 'رسالة جديدة من {{sender}} بخصوص {{parent}}: {{preview}}' },
   invite: { en: '{{actor}} invited you to follow {{parent}}’s care on Barr. Download the app and sign in with this number. Expires in 7 days.', ar: 'دعاك {{actor}} لمتابعة رعاية {{parent}} على بر. حمّل التطبيق وسجّل الدخول بهذا الرقم. تنتهي الدعوة خلال 7 أيام.' },
   no_show: { en: 'The {{visitType}} planned for {{parent}} at {{time}} did not start on time. Your coordinator is arranging it.', ar: '{{visitType}} المقررة لـ {{parent}} الساعة {{time}} لم تبدأ في موعدها. المنسق يرتب الأمر.' },
   visit_reminder: { en: 'Reminder: {{visitType}} with {{parent}} at {{time}}.', ar: 'تذكير: {{visitType}} مع {{parent}} الساعة {{time}}.' },

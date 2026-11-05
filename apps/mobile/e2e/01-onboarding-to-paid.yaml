@@ -1,0 +1,30 @@
+# E2E (§13): onboarding to paid subscription. Run: maestro test e2e/01-onboarding-to-paid.yaml
+# Requires: backend with DEV_FIXED_OTP=123456 and PAYMENT_PROVIDER=fake (or PayTabs sandbox), seeded assessment slots.
+appId: app.barr.family
+---
+- launchApp: { clearState: true }
+- tapOn: "English"
+- tapOn: { id: "phone" }
+- inputText: "+966500009999"
+- tapOn: "Send code"
+- tapOn: { id: "code" }
+- inputText: "123456"
+- tapOn: "Verify"
+- tapOn: "+ Add your parent"
+- tapOn: "Parent name"
+- inputText: "Fatma"
+- tapOn: "Home address"
+- inputText: "12 Shagaret El Dor St, Zamalek"
+- tapOn: "Latitude"
+- inputText: "30.0626"
+- tapOn: "Longitude"
+- inputText: "31.2197"
+- tapOn: "Continue"
+- assertVisible: "Choose a plan"
+- tapOn: "SAR"
+- tapOn: { text: "Pay securely", index: 0 }
+# Hosted payment page (sandbox): complete with the provider's test card, then return.
+- waitForAnimationToEnd
+- assertVisible: "Book the home assessment"
+- tapOn: { index: 0, text: ".*(AM|PM|ص|م).*" }
+- assertVisible: "Assessment booked"
