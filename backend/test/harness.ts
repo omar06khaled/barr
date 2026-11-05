@@ -93,7 +93,7 @@ export async function signInPhone(app: FastifyInstance, phone: string) {
   if (r1.statusCode !== 200) throw new Error(`otp request ${r1.statusCode} ${r1.body}`);
   const r2 = await app.inject({ method: 'POST', url: '/v1/auth/otp/verify', payload: { phone, code: '123456' } });
   if (r2.statusCode !== 200) throw new Error(`otp verify ${r2.statusCode} ${r2.body}`);
-  return r2.json() as { accessToken: string; refreshToken: string; user: { id: string }; isNew: boolean };
+  return r2.json() as { accessToken: string; refreshToken: string; user: { id: string; roles: string[] }; isNew: boolean };
 }
 
 export async function api(h: Harness, token: string, method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE', url: string, payload?: unknown) {

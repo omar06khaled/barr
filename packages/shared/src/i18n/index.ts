@@ -14,3 +14,4 @@ export function translate(lang: Language, key: string, vars: Record<string, stri
   const v = get(dictionaries[lang]) ?? get(en);
   return typeof v === 'string' ? renderTemplate(v, vars) : key;
 }
+export * from './dashboard';
