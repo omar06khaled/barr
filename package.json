@@ -1,0 +1,23 @@
+{
+  "name": "barr",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "setup": "bash infra/setup.sh",
+    "build": "pnpm -r --filter=!@barr/mobile run build",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r --filter=!@barr/mobile run test",
+    "lint": "pnpm -r run typecheck",
+    "dev:backend": "pnpm --filter @barr/backend dev",
+    "dev:worker": "pnpm --filter @barr/backend worker",
+    "dev:dashboard": "pnpm --filter @barr/dashboard dev",
+    "dev:mobile": "pnpm --filter @barr/mobile start",
+    "db:migrate": "pnpm --filter @barr/backend migrate",
+    "db:seed": "pnpm --filter @barr/backend seed"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

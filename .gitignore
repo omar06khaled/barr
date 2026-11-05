@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+!.env.example
+*.log
+.expo/
+.turbo/
+coverage/
+ios/
+android/
+.DS_Store
+storage/
