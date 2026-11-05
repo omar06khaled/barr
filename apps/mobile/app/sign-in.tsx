@@ -14,6 +14,14 @@ import { Button, Card, Chip, Field, Row, Screen, T } from '../src/components/ui'
 
 WebBrowser.maybeCompleteAuthSession();
 const g = ((Constants.expoConfig?.extra as any)?.google ?? {}) as { iosClientId?: string; androidClientId?: string; webClientId?: string };
+const googleClientId = Platform.select({ ios: g.iosClientId, android: g.androidClientId, default: g.webClientId });
+
+/** Mounted only when a Google client ID is configured for this platform (the hook throws otherwise). */
+function GoogleButton({ onToken }: { onToken: (idToken: string) => Promise<void> }) {
+  const { t } = useI18n();
+  const [, , prompt] = Google.useIdTokenAuthRequest({ iosClientId: g.iosClientId, androidClientId: g.androidClientId, webClientId: g.webClientId });
+  return <Button variant="secondary" title={t('auth.google')} onPress={async () => { const r = await prompt(); if (r.type === 'success' && r.params.id_token) await onToken(r.params.id_token); }} />;
+}
 
 export default function SignIn() {
   const { t, lang, setLang } = useI18n();
@@ -24,7 +32,6 @@ export default function SignIn() {
   const [step, setStep] = useState<'phone' | 'code'>('phone');
   const [err, setErr] = useState<string | null>(params.notStaff ? t('auth.staffNotice') : null);
   const [busy, setBusy] = useState(false);
-  const [, , promptGoogle] = Google.useIdTokenAuthRequest({ iosClientId: g.iosClientId, androidClientId: g.androidClientId, webClientId: g.webClientId });
   const field = APP_VARIANT === 'field';
 
   const done = async (tokens: any) => { await signIn(tokens); router.replace('/'); };
@@ -37,10 +44,6 @@ export default function SignIn() {
   const verify = async () => {
     setBusy(true); setErr(null);
     try { await done(await api('/auth/otp/verify', { method: 'POST', body: { phone, code } })); } catch { setErr(t('auth.invalidCode')); } finally { setBusy(false); }
-  };
-  const google = async () => {
-    const r = await promptGoogle();
-    if (r.type === 'success' && r.params.id_token) await done(await api('/auth/oauth', { method: 'POST', body: { provider: 'google', idToken: r.params.id_token } }));
   };
   const apple = async () => {
     try {
@@ -77,7 +80,7 @@ export default function SignIn() {
       </Card>
       {!field && (
         <View style={{ gap: 8 }}>
-          <Button variant="secondary" title={t('auth.google')} onPress={google} />
+          {googleClientId && <GoogleButton onToken={async (idToken) => done(await api('/auth/oauth', { method: 'POST', body: { provider: 'google', idToken } }))} />}
           {/* Apple sign-in is required on iOS when Google is offered. */}
           {Platform.OS === 'ios' && <AppleAuthentication.AppleAuthenticationButton buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE} buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK} cornerRadius={10} style={{ height: 48 }} onPress={apple} />}
         </View>

@@ -3,23 +3,36 @@ import NetInfo from '@react-native-community/netinfo';
 import * as Crypto from 'expo-crypto';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import { api } from './api';
-import { enqueue as enqueueCore, flush, pendingCount, type OutboxOp, type OutboxStore, type PendingPhoto, type OpKind } from './outboxCore';
+import { MemoryStore, enqueue as enqueueCore, flush, pendingCount, type OutboxOp, type OutboxStore, type PendingPhoto, type OpKind } from './outboxCore';
 
-const db = SQLite.openDatabaseSync('barr-field.db');
-db.execSync(`create table if not exists outbox (op_id text primary key, created_at text not null, json text not null);
-             create table if not exists cache (key text primary key, json text not null, updated_at text not null);`);
+// Devices: SQLite (survives restarts and reboots). Web build is a developer preview only → in-memory.
+const web = Platform.OS === 'web';
+const db = web ? null : SQLite.openDatabaseSync('barr-field.db');
+db?.execSync(`create table if not exists outbox (op_id text primary key, created_at text not null, json text not null);
+              create table if not exists cache (key text primary key, json text not null, updated_at text not null);`);
+const memStore = new MemoryStore();
+const memCache = new Map<string, string>();
 
-/** SQLite-backed store: survives app restarts and phone reboots. */
-export const sqliteStore: OutboxStore = {
-  async all() { return (await db.getAllAsync<{ json: string }>('select json from outbox order by created_at')).map((r) => JSON.parse(r.json) as OutboxOp); },
-  async put(op) { await db.runAsync('insert or replace into outbox (op_id, created_at, json) values (?,?,?)', [op.opId, op.createdAt, JSON.stringify(op)]); },
-};
+export const sqliteStore: OutboxStore = db
+  ? {
+      async all() { return (await db.getAllAsync<{ json: string }>('select json from outbox order by created_at')).map((r) => JSON.parse(r.json) as OutboxOp); },
+      async put(op) { await db.runAsync('insert or replace into outbox (op_id, created_at, json) values (?,?,?)', [op.opId, op.createdAt, JSON.stringify(op)]); },
+    }
+  : memStore;
 
 /** Cached visit packages so a visit can be opened and completed with no signal. */
 export const cache = {
-  async get<T>(key: string): Promise<T | null> { const r = await db.getFirstAsync<{ json: string }>('select json from cache where key=?', [key]); return r ? (JSON.parse(r.json) as T) : null; },
-  async set(key: string, v: unknown) { await db.runAsync('insert or replace into cache (key, json, updated_at) values (?,?,?)', [key, JSON.stringify(v), new Date().toISOString()]); },
+  async get<T>(key: string): Promise<T | null> {
+    if (!db) { const v = memCache.get(key); return v ? (JSON.parse(v) as T) : null; }
+    const r = await db.getFirstAsync<{ json: string }>('select json from cache where key=?', [key]);
+    return r ? (JSON.parse(r.json) as T) : null;
+  },
+  async set(key: string, v: unknown) {
+    if (!db) { memCache.set(key, JSON.stringify(v)); return; }
+    await db.runAsync('insert or replace into cache (key, json, updated_at) values (?,?,?)', [key, JSON.stringify(v), new Date().toISOString()]);
+  },
 };
 
 const listeners = new Set<() => void>();

@@ -39,7 +39,7 @@ function Root() {
       <I18nProvider>
         <AuthProvider>
           <StatusBar style="dark" />
-          <Stack screenOptions={{ headerStyle: { backgroundColor: colors.paper }, headerTintColor: colors.green900, contentStyle: { backgroundColor: colors.paper } }}>
+          <Stack screenOptions={{ headerTitle: '', headerBackButtonDisplayMode: 'minimal', headerStyle: { backgroundColor: colors.paper }, headerTintColor: colors.green900, contentStyle: { backgroundColor: colors.paper } }}>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="sign-in" options={{ headerShown: false }} />
             <Stack.Screen name="(family)" options={{ headerShown: false }} />

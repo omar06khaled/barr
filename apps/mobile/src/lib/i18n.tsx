@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { I18nManager } from 'react-native';
 import * as Localization from 'expo-localization';
-import * as SecureStore from 'expo-secure-store';
+import { secureStorage } from './secureStorage';
 import * as Updates from 'expo-updates';
 import { translate, type Language } from '@barr/shared';
 
@@ -11,9 +11,9 @@ const Ctx = createContext<I18n>(null as unknown as I18n);
 /** Arabic (RTL) and English everywhere. Switching direction needs a reload on native (I18nManager). */
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Language>(() => (Localization.getLocales()[0]?.languageCode === 'en' ? 'en' : 'ar'));
-  useEffect(() => { SecureStore.getItemAsync('barr.lang').then((l) => l && setLangState(l as Language)); }, []);
+  useEffect(() => { secureStorage.get('barr.lang').then((l) => l && setLangState(l as Language)); }, []);
   const setLang = async (l: Language) => {
-    await SecureStore.setItemAsync('barr.lang', l);
+    await secureStorage.set('barr.lang', l);
     setLangState(l);
     const wantRtl = l === 'ar';
     if (I18nManager.isRTL !== wantRtl) {

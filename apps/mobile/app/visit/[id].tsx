@@ -143,7 +143,7 @@ export default function Visit() {
       ) : (
         <>
           <Card>
-            <T kind="bold">✓ {t('timeline.arrived')} {new Date(checkedIn).toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-GB', { hour: '2-digit', minute: '2-digit' })}</T>
+            <T kind="bold">✓ {t('timeline.arrived')} {new Date(checkedIn).toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Cairo' })}</T>
             {!!tpl?.tasks.length && <><T kind="heading" size="lg">{t('field.checklist')}</T>
               <Row>{tpl.tasks.map((x) => <Chip key={x.code} label={lang === 'ar' ? x.label_ar : x.label_en} selected={st.tasks.includes(x.code)} onPress={() => update({ tasks: st.tasks.includes(x.code) ? st.tasks.filter((c) => c !== x.code) : [...st.tasks, x.code] })} />)}</Row></>}
           </Card>

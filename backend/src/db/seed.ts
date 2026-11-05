@@ -35,8 +35,12 @@ async function main() {
     const now = new Date();
     const today = localParts(now, TZ).date;
     const city = (await c.query(`insert into cities (name_en, name_ar) values ('Cairo','القاهرة') returning id`)).rows[0].id;
-    const user = async (phone: string, first: string, roles: string[], lang = 'ar') =>
-      (await c.query(`insert into users (phone_enc, phone_hash, first_name, display_name, roles, language, phone_verified_at) values ($1,$2,$3,$3,$4,$5,now()) returning id`, [crypto.encrypt(phone), crypto.blindIndex(phone), first, roles, lang])).rows[0].id as string;
+    const names = new Map<string, string>();
+    const user = async (phone: string, first: string, roles: string[], lang = 'ar') => {
+      const id = (await c.query(`insert into users (phone_enc, phone_hash, first_name, display_name, roles, language, phone_verified_at) values ($1,$2,$3,$3,$4,$5,now()) returning id`, [crypto.encrypt(phone), crypto.blindIndex(phone), first, roles, lang])).rows[0].id as string;
+      names.set(id, first);
+      return id;
+    };
     const admin = await user('+201000000001', 'Omar', ['admin'], 'en');
     const staff: { id: string; role: string; pod?: string }[] = [];
     const addStaff = async (phone: string, first: string, role: string, gender: string, pod: string | null) => {
@@ -128,7 +132,7 @@ async function main() {
         if (missed) continue;
         const obs = { mood: between(3, 5), appetite: pick(['normal', 'good', 'good', 'poor']), sleep: pick(['normal', 'good', 'poor']), mobility: pick(['independent', 'with_aid']), hydration: pick(['ok', 'ok', 'ok', 'concern']), medicineAdherence: 'ok', socialContact: rnd() < 0.8, fallsSinceLastVisit: rnd() < 0.05 ? 1 : 0 };
         const vitals = v.type === 'caregiver_shift' ? [] : [{ kind: 'bp_systolic' as const, value: between(115, 158) }, { kind: 'bp_diastolic' as const, value: between(70, 92) }, { kind: 'pulse' as const, value: between(62, 96) }];
-        const input = { parentName: pname, staffName: '', visitType: v.type as VisitType, checkedInAt: checkIn.toISOString(), checkedOutAt: checkOut.toISOString(), observations: obs as any, vitals, tasksDone: [], note: pick(['', 'Good day, chatted about grandchildren.', 'Reminded about water intake.', 'Walked around the block together.']), photoCount: 0 };
+        const input = { parentName: pname, staffName: names.get(rule.staffUserId) ?? '', visitType: v.type as VisitType, checkedInAt: checkIn.toISOString(), checkedOutAt: checkOut.toISOString(), observations: obs as any, vitals, tasksDone: [], note: pick(['', 'Good day, chatted about grandchildren.', 'Reminded about water intake.', 'Walked around the block together.']), photoCount: 0 };
         const rep = templateVisitReportGenerator.generate(p, { from: today, to: today }, input);
         await c.query(`insert into visit_observations (visit_id, parent_id, data, recorded_by, recorded_at) values ($1,$2,$3,$4,$5)`, [vid, p, obs, rule.staffUserId, checkOut]);
         for (const x of vitals) { const a = assessVital(x.kind, x.value, defaultConfig.vitalsCritical); await c.query(`insert into vital_readings (visit_id, parent_id, kind, value, out_of_range, critical, recorded_at, recorded_by) values ($1,$2,$3,$4,$5,$6,$7,$8)`, [vid, p, x.kind, x.value, a.outOfRange, a.critical, checkIn, rule.staffUserId]); }
