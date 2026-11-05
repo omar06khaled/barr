@@ -23,6 +23,8 @@ export interface Harness {
   push: RecordingChannel; whatsapp: RecordingChannel; sms: RecordingChannel; calls: RecordingChannel; payments: FakePaymentProvider;
   ids: Record<string, string>;
   token(role: keyof Harness['tokens']): string;
+  /** Re-sign-in all staff (access tokens live 15 min; tests that jump the clock call this, as the app's refresh would). */
+  relogin(): Promise<void>;
   tokens: Record<'admin' | 'coordinator' | 'nurse' | 'doctor' | 'backupDoctor' | 'caregiver' | 'unverifiedNurse' | 'otherNurse', string>;
   close(): Promise<void>;
 }
@@ -81,6 +83,7 @@ export async function makeHarness(start = new Date('2026-11-05T07:00:00Z')): Pro
   return {
     app, d, clock, worker, owner, push, whatsapp, sms, calls, payments, ids, tokens,
     token: (r) => tokens[r],
+    relogin: async () => { for (const [k, phone] of Object.entries(phones)) tokens[k as keyof typeof tokens] = (await signInPhone(app, phone)).accessToken; },
     close: async () => { await app.close(); await d.db.close(); await owner.end(); },
   };
 }
